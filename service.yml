@@ -165,9 +165,9 @@ Resources:
         Ref: RestApi
       AuthorizationType: NONE
       Integration:
-        Type: AWS
+        Type: AWS_PROXY
         Uri:
-          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/path"
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Env}-${Name}-SendMessage/invocations"
         ContentHandling: CONVERT_TO_TEXT
         IntegrationHttpMethod: POST
         IntegrationResponses:
@@ -198,11 +198,11 @@ Resources:
         Ref: RestApi
       AuthorizationType: NONE
       Integration:
-        Type: AWS
+        Type: AWS_PROXY
         Uri:
-          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/path"
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Env}-${Name}-history/invocations"
         ContentHandling: CONVERT_TO_TEXT
-        IntegrationHttpMethod: POST
+        IntegrationHttpMethod: GET
         IntegrationResponses:
           - ContentHandling: CONVERT_TO_TEXT
             StatusCode: 200
