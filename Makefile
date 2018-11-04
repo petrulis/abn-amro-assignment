@@ -7,5 +7,7 @@ test:
 	go test ./history
 	go test ./send
 
+deploy:
+
 clean:
 	rm -rf ./bin

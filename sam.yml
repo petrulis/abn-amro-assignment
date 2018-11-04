@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  History:
+    Properties:
+      CodeUri: .
+      Events:
+        Get:
+          Properties:
+            Method: get
+            Path: /history
+          Type: Api
+        Options:
+          Properties:
+            Method: options
+            Path: /history
+          Type: Api
+      Handler: bin/history
+      Runtime: go1.x
+    Type: AWS::Serverless::Function
+  Send:
+    Properties:
+      CodeUri: .
+      Events:
+        Delete:
+          Properties:
+            Method: post
+            Path: /send
+          Type: Api
+        Options:
+          Properties:
+            Method: options
+            Path: /send
+          Type: Api
+      Handler: bin/send
+      Runtime: go1.x
+    Type: AWS::Serverless::Function
+Transform: AWS::Serverless-2016-10-31

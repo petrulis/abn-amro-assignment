@@ -212,3 +212,14 @@ Resources:
           Fn::GetAtt: [ApiGatewayRole, Arn]
       RequestValidatorId:
         Ref: RequestValidator
+  HistoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: bin/history
+      Runtime: go1.x
+      Events:
+        MyTimeApi:
+          Type: Api
+          Properties:
+            Path: /TimeResource
+            Method: GET
