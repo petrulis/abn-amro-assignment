@@ -8,21 +8,27 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aws/aws-sdk-go/service/sns"
 	"github.com/go-errors/errors"
 	"github.com/petrulis/abn-amro-assignment/model"
 	"os"
 )
 
+const sender = "no-reply@segmnt.net"
+const charSet = "UTF-8"
+
 var ddb *dynamodb.DynamoDB
 var tbl *string
 var snc *sns.SNS
+var sec *ses.SES
 
 func init() {
 	sess := session.Must(session.NewSession(&aws.Config{Region: aws.String(os.Getenv("REGION"))}))
 	ddb = dynamodb.New(sess)
 	tbl = aws.String(os.Getenv("DDB_TABLE"))
 	snc = sns.New(sess)
+	sec = ses.New(sess)
 }
 
 func sendSMS(request *model.MessageRequest) error {
@@ -35,7 +41,26 @@ func sendSMS(request *model.MessageRequest) error {
 }
 
 func sendEmail(request *model.MessageRequest) error {
-	return nil
+	input := &ses.SendEmailInput{
+		Destination: &ses.Destination{
+			ToAddresses: []*string{aws.String(request.RecipientIdentifier)},
+		},
+		Message: &ses.Message{
+			Body: &ses.Body{
+				Html: &ses.Content{
+					Charset: aws.String(charSet),
+					Data:    aws.String(request.Body),
+				},
+			},
+			Subject: &ses.Content{
+				Charset: aws.String(charSet),
+				Data:    aws.String("Email from ABN AMRO Assignment"),
+			},
+		},
+		Source: aws.String(sender),
+	}
+	_, err := sec.SendEmail(input)
+	return err
 }
 
 func updateStatus(request *model.MessageRequest) error {
