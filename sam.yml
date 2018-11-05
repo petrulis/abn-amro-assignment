@@ -104,6 +104,17 @@ Resources:
         ScaleOutCooldown: 60
         PredefinedMetricSpecification:
           PredefinedMetricType: DynamoDBReadCapacityUtilization
+  JobQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      RedrivePolicy:
+        deadLetterTargetArn:
+          Fn::GetAtt:
+            - "JobDeadLetterQueue"
+            - "Arn"
+        maxReceiveCount: 5
+  JobDeadLetterQueue:
+    Type: AWS::SQS::Queue
   History:
     Type: AWS::Serverless::Function
     Properties:
@@ -177,7 +188,7 @@ Resources:
           DDB_TABLE:
             Ref: MessageRequestTable
           DEFAULT_REGION: US
-  JobSender:
+  JobScanner:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./bin/
@@ -186,7 +197,7 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: rate(1 minute)
-      Handler: sender
+      Handler: scanner
       Runtime: go1.x
       Policies:
         - AWSLambdaExecute
@@ -207,3 +218,5 @@ Resources:
             Fn::Sub: "${AWS::Region}"
           DDB_TABLE:
             Ref: MessageRequestTable
+          QUEUE_URL:
+            Ref: JobQueue
