@@ -46,11 +46,18 @@
     "private/protocol/xml/xmlutil",
     "service/dynamodb",
     "service/dynamodb/dynamodbattribute",
+    "service/sns",
     "service/sqs",
     "service/sts"
   ]
   revision = "3264db248fe8d241f6949ed35e33b11c0aec3c93"
   version = "v1.15.68"
+
+[[projects]]
+  name = "github.com/go-errors/errors"
+  packages = ["."]
+  revision = "a6af135bd4e28680facf08a3d206b454abc877a4"
+  version = "v1.0.1"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -84,6 +91,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4ad06f61d4e3dc124f3421e88ed1a71e5bf523cb67386e0698794f4d4abbdf93"
+  inputs-digest = "e6fe5483d21fa4bbb563f381cf7c79791a3e9e5b83b1dbab9e502814b05e57df"
   solver-name = "gps-cdcl"
   solver-version = 1

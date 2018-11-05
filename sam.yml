@@ -250,11 +250,11 @@ Resources:
     Properties:
       CodeUri: ./bin/
       Events:
-        Schedule:
+        SQS:
           Type: SQS
           Properties:
             Queue:
-              Ref: JobQueue
+              Fn::GetAtt: [JobQueue, Arn]
       Handler: sender
       Runtime: go1.x
       Policies:
