@@ -275,6 +275,10 @@ Resources:
                 - sqs:ReceiveMessage
               Resource:
                 Fn::GetAtt: [JobQueue, Arn]
+            - Effect: Allow
+              Action:
+                - sns:Publish
+              Resource: "*"
       Environment:
         Variables:
           REGION:
