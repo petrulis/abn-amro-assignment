@@ -70,20 +70,75 @@ Resources:
               RunOrder: 1
         - Name: Deploy
           Actions:
-            - Name: Deploy
+            - Name: ComputeChangeSet
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
                 Version: 1
                 Provider: CloudFormation
               Configuration:
-                ActionMode: CREATE_UPDATE
-                RoleARN: [CodePipelineRole, Arn]
+                ActionMode: CHANGE_SET_REPLACE
+                RoleArn:
+                    Fn::GetAtt: [CloudFormationRole, Arn]
+                ChangeSetName: ChangeSet
+                TemplatePath: BuildOutput::output.yml
                 StackName:
                   Ref: StackName
+                Capabilities: CAPABILITY_IAM
               InputArtifacts:
                 - Name: BuildOutput
               RunOrder: 1
+            - Name: ExecuteChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: 1
+              Configuration:
+                ActionMode: CHANGE_SET_EXECUTE
+                ChangeSetName: ChangeSet
+                RoleArn:
+                    Fn::GetAtt: [CloudFormationRole, Arn]
+                StackName:
+                    Ref: StackName
+                Capabilities: CAPABILITY_IAM
+              RunOrder: 2
+  CloudFormationRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Resource: '*'
+                Effect: Allow
+                Action:
+                  - 'cloudformation:*'
+                  - 'iam:CreateRole'
+                  - 'iam:AttachRolePolicy'
+                  - 'iam:DetachRolePolicy'
+                  - 'iam:GetRole'
+                  - 'iam:DeleteRole'
+                  - 'lambda:CreateFunction'
+                  - 'lambda:GetFunctionConfiguration'
+                  - 'lambda:DeleteFunction'
+                  - 'iam:PassRole'
+                  - 's3:GetObject'
+                  - 'lambda:AddPermission'
+                  - 'lambda:RemovePermission'
+              - Effect: Allow
+                Action:
+                  - 'apigateway:*'
+                Resource: '*'
   CodePipelineRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -111,7 +166,11 @@ Resources:
               - Resource: '*'
                 Effect: Allow
                 Action:
-                  - 'cloudformation:*'
+                  - 'cloudformation:DescribeStacks'
+                  - 'cloudformation:CreateStack'
+                  - 'cloudformation:DescribeChangeSet'
+                  - 'cloudformation:CreateChangeSet'
+                  - 'cloudformation:ExecuteChangeSet'
                   - 'codebuild:StartBuild'
                   - 'codebuild:BatchGetBuilds'
                   - 'iam:PassRole'
@@ -128,7 +187,8 @@ Resources:
               - 's3:PutObject'
               - 's3:GetObjectVersion'
             Resource:
-              Fn::Sub: 'arn:aws:s3:::${ArtifactStore}/*'
+              - Fn::Sub: 'arn:aws:s3:::${ArtifactStore}/*'
+              - 'arn:aws:s3:::abn-ambro-deployment-bucket/*'
       ServiceName:
         Fn::Sub: 'com.amazonaws.${AWS::Region}.s3'
       RouteTableIds:
@@ -165,13 +225,13 @@ Resources:
       GroupDescription: 'CodeBuild SecurityGroup'
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
+          FromPort: 0
+          ToPort: 65535
           CidrIp: 0.0.0.0/0
       SecurityGroupEgress:
         - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
+          FromPort: 0
+          ToPort: 65535
           CidrIp: 0.0.0.0/0
       VpcId:
         Ref: VpcId
@@ -191,7 +251,7 @@ Resources:
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Type: LINUX_CONTAINER
-        Image: 'aws/codebuild/docker:17.09.0'
+        Image: 'aws/codebuild/golang:1.10'
         PrivilegedMode: true
         EnvironmentVariables:
           - Name: ENV
@@ -205,6 +265,9 @@ Resources:
         Type: CODEPIPELINE
       TimeoutInMinutes:
         Ref: TimeoutInMinutes
+      LogsConfig:
+        CloudWatchLogs:
+          Status: ENABLED
   CodeBuildServiceRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -223,9 +286,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'logs:CreateLogGroup'
-                  - 'logs:CreateLogStream'
-                  - 'logs:PutLogEvents'
+                  - 'logs:*'
+                  - 'cloudwatch:*'
                 Resource: '*'
               - Effect: Allow
                 Action:
@@ -236,12 +298,12 @@ Resources:
                   Fn::Sub: 'arn:aws:s3:::${ArtifactStore}/*'
               - Effect: Allow
                 Action:
-                  - 'ec2:DescribeSecurityGroups'
-                  - 'ec2:DescribeSubnets'
-                  - 'ec2:CreateNetworkInterfacePermission'
                   - 'ec2:CreateNetworkInterface'
                   - 'ec2:DescribeNetworkInterfaces'
                   - 'ec2:DeleteNetworkInterface'
+                  - 'ec2:DescribeSubnets'
+                  - 'ec2:DescribeSecurityGroups'
                   - 'ec2:DescribeDhcpOptions'
-                  - 'ec2:*'
+                  - 'ec2:DescribeVpcs'
+                  - 'ec2:CreateNetworkInterfacePermission'
                 Resource: '*'

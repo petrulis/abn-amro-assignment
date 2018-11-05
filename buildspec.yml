@@ -1,15 +1,14 @@
 version: 0.2
 phases:
-  install:
+  pre_build:
     commands:
-      - sudo apt-get install build-essential -y
+      - dep ensure
+  build:
+    commands:
       - make build
-      - aws cloudformation package
-          --template-file sam.yaml
-          --s3-bucket abn-ambro-deployment-bucket
-          --output-template-file output.yaml
+      - aws cloudformation package --template-file sam.yml --s3-bucket abn-ambro-deployment-bucket --output-template-file output.yml
 artifacts:
   type: zip
   files:
-    - sam.yaml
-    - output.yaml
+    - sam.yml
+    - output.yml
