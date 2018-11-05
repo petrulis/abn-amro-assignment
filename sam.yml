@@ -119,7 +119,7 @@ Resources:
             Method: options
             Path: /history
           Type: Api
-      Handler: bin/history
+      Handler: history
       Runtime: go1.x
       Policies:
         - AWSLambdaExecute
@@ -155,7 +155,7 @@ Resources:
             Method: options
             Path: /send
           Type: Api
-      Handler: bin/send
+      Handler: send
       Runtime: go1.x
       Policies:
         - AWSLambdaExecute
@@ -186,7 +186,7 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: rate(1 minute)
-      Handler: bin/sender
+      Handler: sender
       Runtime: go1.x
       Policies:
         - AWSLambdaExecute
