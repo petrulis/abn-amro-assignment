@@ -127,8 +127,7 @@ Resources:
                 - 'sqs:SendMessage'
             Resource: "*"
           - Effect: Allow
-            Principal:
-              AWS:
+            Principal: "*"
             Action:
               - 'sqs:ReceiveMessage'
               - 'sqs:DeleteMessage'
