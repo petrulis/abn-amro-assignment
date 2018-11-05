@@ -76,7 +76,7 @@ func updateStatus(request *model.MessageRequest) error {
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":d": {S: aws.String(model.DeliveryStatusSent)},
 		},
-		UpdateExpression: aws.String("#d = :d"),
+		UpdateExpression: aws.String("SET #d = :d"),
 	}
 	_, err := ddb.UpdateItem(input)
 	return err
