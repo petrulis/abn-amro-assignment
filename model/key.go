@@ -9,8 +9,8 @@ import (
 
 // Key represents MessageRequest partition key
 type Key struct {
-	RecipientIdentifier *string
-	RequestID           *string
+	RecipientIdentifier *string `json:"RecipientIdentifier"`
+	RequestID           *string `json:"RequestId"`
 }
 
 // NewKeyFromString creates new Key from base64 encoded string.
