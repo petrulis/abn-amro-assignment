@@ -112,6 +112,7 @@ func (d *DynamoDbDriver) newFindByRequestIdentifierQueryInput(rid *string, exclu
 	}
 	if exclusiveStartKey != nil {
 		input.ExclusiveStartKey = exclusiveStartKey.MarshalMap()
+		fmt.Println(input.ExclusiveStartKey)
 	}
 	return input
 }
