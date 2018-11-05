@@ -19,7 +19,7 @@ Resources:
       Handler: bin/history
       Runtime: go1.x
       Policies:
-       - AWSLambdaExecute
+        - AWSLambdaExecute
   Send:
     Type: AWS::Serverless::Function
     Properties:
@@ -38,4 +38,4 @@ Resources:
       Handler: bin/send
       Runtime: go1.x
       Policies:
-       - AWSLambdaExecute
+        - AWSLambdaExecute
