@@ -8,6 +8,7 @@ import (
 	"github.com/petrulis/abn-amro-assignment/model"
 	"strconv"
 	"time"
+	"fmt"
 )
 
 // DynamoDbDriver provides handy operation methods for making requests to
@@ -53,14 +54,17 @@ func (d *DynamoDbDriver) FindByRecipientIdentifier(rid *string, exclusiveStartKe
 	input := d.newFindByRequestIdentifierQueryInput(rid, exclusiveStartKey)
 	out, err := d.client.Query(input)
 	if err != nil {
+		fmt.Println(err)
 		return nil, nil, err
 	}
 	req, err := d.newMessageRequestList(out.Items)
 	if err != nil {
+		fmt.Println(err)
 		return nil, nil, err
 	}
 	key, err := model.NewKeyFromMap(out.LastEvaluatedKey)
 	if err != nil {
+		fmt.Println(err)
 		return nil, nil, err
 	}
 	return req, key, err
