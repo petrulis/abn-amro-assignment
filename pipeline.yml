@@ -85,6 +85,11 @@ Resources:
                 StackName:
                   Ref: StackName
                 Capabilities: CAPABILITY_IAM
+                ParameterOverrides: |
+                  {
+                    "Env": { "Fn::GetParam" : ["BuildOutput", "params.json", "Env"]},
+                    "TableName": { "Fn::GetParam" : ["BuildOutput", "params.json", "TableName"]}
+                  }
               InputArtifacts:
                 - Name: BuildOutput
               RunOrder: 1
@@ -102,15 +107,11 @@ Resources:
                 StackName:
                   Ref: StackName
                 Capabilities: CAPABILITY_IAM
-                ParameterOverrides:
-                  Env:
-                    Fn::GetParam: ["BuildOutput", "params.json", "Env"]
-                  Name:
-                    Fn::GetParam: ["BuildOutput", "params.json", "Name"]
-                  MinimumCompressionSize:
-                    Fn::GetParam: ["BuildOutput", "params.json", "MinimumCompressionSize"]
-                  TableName:
-                    Fn::GetParam: ["BuildOutput", "params.json", "TableName"]
+                ParameterOverrides: |
+                  {
+                    "Env": { "Fn::GetParam" : ["BuildOutput", "params.json", "Env"]},
+                    "TableName": { "Fn::GetParam" : ["BuildOutput", "params.json", "TableName"]}
+                  }
               RunOrder: 2
   CloudFormationRole:
     Type: 'AWS::IAM::Role'
@@ -137,14 +138,21 @@ Resources:
                   - 'iam:DetachRolePolicy'
                   - 'iam:GetRole'
                   - 'iam:DeleteRole'
+                  - 'iam:PassRole'
+                  - 'iam:DeleteRolePolicy'
+                  - 'iam:PutRolePolicy'
                   - 'lambda:CreateFunction'
                   - 'lambda:GetFunctionConfiguration'
                   - 'lambda:DeleteFunction'
-                  - 'iam:PassRole'
-                  - 's3:GetObject'
                   - 'lambda:AddPermission'
                   - 'lambda:RemovePermission'
                   - 'lambda:UpdateFunctionCode'
+                  - 's3:GetObject'
+                  - 'dynamodb:DescribeTable'
+                  - 'dynamodb:DeleteTable'
+                  - 'dynamodb:UpdateTable'
+                  - 'dynamodb:CreateTable'
+                  - 'application-autoscaling:*'
               - Effect: Allow
                 Action:
                   - 'apigateway:*'

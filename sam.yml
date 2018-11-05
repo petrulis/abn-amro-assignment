@@ -123,6 +123,18 @@ Resources:
       Runtime: go1.x
       Policies:
         - AWSLambdaExecute
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+          Action:
+            - lambda:InvokeFunction
+          Resource: '*'
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+          Resource: '*'
   Send:
     Type: AWS::Serverless::Function
     Properties:
@@ -142,3 +154,4 @@ Resources:
       Runtime: go1.x
       Policies:
         - AWSLambdaExecute
+        - AmazonAPIGatewayInvokeFullAccess
