@@ -16,6 +16,7 @@ var (
 	dd       *dynamodbdriver.DynamoDbDriver
 )
 
+// init creates long lived resources required by Handler.
 func init() {
 	sess := session.Must(session.NewSession(&aws.Config{Region: aws.String(os.Getenv("REGION"))}))
 	sqc = sqs.New(sess)
@@ -25,6 +26,8 @@ func init() {
 	})
 }
 
+// Handler searches for ready to be sent messages and push them
+// to Amazon SQS for further processing.
 func Handler() error {
 	reqs, err := dd.FindScheduled(time.Now())
 	if err != nil {

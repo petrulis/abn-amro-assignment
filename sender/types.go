@@ -8,17 +8,19 @@ import (
 	"github.com/petrulis/abn-amro-assignment/model"
 )
 
+// SMSSender represents SMS delivery method.
 type SMSSender struct {
 	client *sns.SNS
 }
 
-// NewSMSSender ...
+// NewSMSSender creates new SMSSender form session.
 func NewSMSSender(sess *session.Session) *SMSSender {
 	return &SMSSender{
 		client: sns.New(sess),
 	}
 }
 
+// Send publishes new message to Amazon SNS.
 func (s *SMSSender) Send(request *model.MessageRequest) error {
 	input := &sns.PublishInput{
 		PhoneNumber: aws.String(request.RecipientIdentifier),
@@ -28,17 +30,22 @@ func (s *SMSSender) Send(request *model.MessageRequest) error {
 	return err
 }
 
+// EmailSenderConfig represents EmailSender condfiguration.
 type EmailSenderConfig struct {
+	// CharSet represents message and subject encoding.
 	CharSet    *string
+
+	// SenderName represents email from which new message can be sent.
 	SenderName *string
 }
 
+// EmailSender represents Email delivery method.
 type EmailSender struct {
 	client *ses.SES
 	cfg    *EmailSenderConfig
 }
 
-// NewEmailSender ...
+// NewEmailSender creates new EmailSender from session and configuration.
 func NewEmailSender(sess *session.Session, cfg *EmailSenderConfig) *EmailSender {
 	return &EmailSender{
 		client: ses.New(sess),
@@ -46,13 +53,14 @@ func NewEmailSender(sess *session.Session, cfg *EmailSenderConfig) *EmailSender 
 	}
 }
 
-// Send ...
+// Send executes Amazon SES SenEmail operation.
 func (s *EmailSender) Send(request *model.MessageRequest) error {
 	input := s.newSendEmailInput(request)
 	_, err := s.client.SendEmail(input)
 	return err
 }
 
+// newSendEmailInput creates new Amazon SES SendEmailInput from MessageRequest.
 func (s *EmailSender) newSendEmailInput(request *model.MessageRequest) *ses.SendEmailInput {
 	html := &ses.Content{
 		Charset: s.cfg.CharSet,

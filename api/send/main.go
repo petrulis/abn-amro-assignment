@@ -6,12 +6,12 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/google/uuid"
 	"github.com/petrulis/abn-amro-assignment/dynamodbdriver"
 	"github.com/petrulis/abn-amro-assignment/model"
 	"github.com/petrulis/abn-amro-assignment/validator"
 	"net/http"
 	"os"
-	"github.com/google/uuid"
 )
 
 var (

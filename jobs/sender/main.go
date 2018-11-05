@@ -21,6 +21,7 @@ var (
 	sta *sender.SMSSender
 )
 
+// init creates long lived resources required by Handler.
 func init() {
 	sess := session.Must(session.NewSession(&aws.Config{Region: aws.String(os.Getenv("REGION"))}))
 	dd = dynamodbdriver.New(sess, &dynamodbdriver.DriverConfig{
@@ -33,6 +34,7 @@ func init() {
 	})
 }
 
+// send picks correct delivery method initiates send operation.
 func send(req *model.MessageRequest) error {
 	switch req.IdentifierType {
 	case model.IdentifierTypeSMS:
@@ -44,6 +46,8 @@ func send(req *model.MessageRequest) error {
 	}
 }
 
+// Handler creates new MessageRequest and sends through sender.Sender
+// or rollbacks to queued state if message couldn't be sent.
 func Handler(ctx context.Context, event events.SQSEvent) error {
 	for _, rec := range event.Records {
 		req, err := model.NewMessageRequestFromString(rec.Body)
