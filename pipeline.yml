@@ -189,6 +189,7 @@ Resources:
                   - 'cloudformation:DescribeChangeSet'
                   - 'cloudformation:CreateChangeSet'
                   - 'cloudformation:ExecuteChangeSet'
+                  - 'cloudformation:DeleteChangeSet'
                   - 'codebuild:StartBuild'
                   - 'codebuild:BatchGetBuilds'
                   - 'iam:PassRole'
