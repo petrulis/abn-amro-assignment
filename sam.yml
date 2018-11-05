@@ -126,15 +126,20 @@ Resources:
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
-          Action:
-            - lambda:InvokeFunction
-          Resource: '*'
-        - Version: '2012-10-17'
-          Statement:
+              Action:
+                - lambda:InvokeFunction
+              Resource: '*'
             - Effect: Allow
-          Action:
-            - dynamodb:PutItem
-          Resource: '*'
+              Action:
+                - dynamodb:Query
+              Resource:
+                Fn::GetAtt: [MessageRequestTable, Arn]
+      Environment:
+        Variables:
+          REGION:
+            Fn::Sub: "${AWS:Region}"
+          DDB_TABLE:
+            Ref: MessageRequestTable
   Send:
     Type: AWS::Serverless::Function
     Properties:
@@ -154,4 +159,21 @@ Resources:
       Runtime: go1.x
       Policies:
         - AWSLambdaExecute
-        - AmazonAPIGatewayInvokeFullAccess
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - dynamodb:PutItem
+              Resource:
+                Fn::GetAtt: [MessageRequestTable, Arn]
+      Environment:
+        Variables:
+          REGION:
+            Fn::Sub: "${AWS:Region}"
+          DDB_TABLE:
+            Ref: MessageRequestTable
+          DEFAULT_REGION: US
