@@ -135,6 +135,7 @@ Resources:
                   - 's3:GetObject'
                   - 'lambda:AddPermission'
                   - 'lambda:RemovePermission'
+                  - 'lambda:UpdateFunctionCode'
               - Effect: Allow
                 Action:
                   - 'apigateway:*'
