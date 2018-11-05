@@ -147,6 +147,7 @@ Resources:
                   - 'lambda:AddPermission'
                   - 'lambda:RemovePermission'
                   - 'lambda:UpdateFunctionCode'
+                  - 'lambda:UpdateFunctionConfiguration'
                   - 's3:GetObject'
                   - 'dynamodb:DescribeTable'
                   - 'dynamodb:DeleteTable'
