@@ -1,17 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/petrulis/abn-amro-assignment/model"
-	"encoding/json"
-	"net/http"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/aws"
-	"os"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/google/uuid"
+	"github.com/petrulis/abn-amro-assignment/model"
+	"net/http"
+	"os"
 )
 
 var ddb *dynamodb.DynamoDB
@@ -44,7 +44,7 @@ func Handler(event events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	}
 	input := &dynamodb.PutItemInput{
 		TableName: tbl,
-		Item: item,
+		Item:      item,
 	}
 	_, err = ddb.PutItem(input)
 	if err != nil {
