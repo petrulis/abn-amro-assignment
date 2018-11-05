@@ -31,14 +31,15 @@ func Handler(event events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 		return events.APIGatewayProxyResponse{StatusCode: errBadRequest.GetStatusCode(), Body: errBadRequest.GetJSON()}, nil
 	}
 	token, ok := event.QueryStringParameters["token"]
-	if !ok {
-		return events.APIGatewayProxyResponse{StatusCode: errBadRequest.GetStatusCode(), Body: errBadRequest.GetJSON()}, nil
+	var exclusiveStartKey *model.Key
+	if ok {
+		key, err := model.NewKeyFromString(token)
+		if err != nil {
+			return events.APIGatewayProxyResponse{StatusCode: errBadRequest.GetStatusCode(), Body: errBadRequest.GetJSON()}, nil
+		}
+		exclusiveStartKey = key
 	}
-	key, err := model.NewKeyFromString(token)
-	if !ok {
-		return events.APIGatewayProxyResponse{StatusCode: errBadRequest.GetStatusCode(), Body: errBadRequest.GetJSON()}, nil
-	}
-	requests, lastEvaluatedKey, err := dd.FindByRecipientIdentifier(aws.String(rid), key)
+	requests, lastEvaluatedKey, err := dd.FindByRecipientIdentifier(aws.String(rid), exclusiveStartKey)
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: errInternal.GetStatusCode(), Body: errInternal.GetJSON()}, nil
 	}
