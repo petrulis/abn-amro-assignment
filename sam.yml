@@ -107,7 +107,7 @@ Resources:
   History:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: .
+      CodeUri: ./bin/
       Events:
         Get:
           Properties:
@@ -143,7 +143,7 @@ Resources:
   Send:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: .
+      CodeUri: ./bin/
       Events:
         Delete:
           Properties:
@@ -177,3 +177,33 @@ Resources:
           DDB_TABLE:
             Ref: MessageRequestTable
           DEFAULT_REGION: US
+  JobSender:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./bin/
+      Events:
+        Schedule:
+          Type: Schedule
+          Properties:
+            Schedule: rate(1 minute)
+      Handler: bin/sender
+      Runtime: go1.x
+      Policies:
+        - AWSLambdaExecute
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - dynamodb:Query
+              Resource:
+                Fn::GetAtt: [MessageRequestTable, Arn]
+      Environment:
+        Variables:
+          REGION:
+            Fn::Sub: "${AWS::Region}"
+          DDB_TABLE:
+            Ref: MessageRequestTable

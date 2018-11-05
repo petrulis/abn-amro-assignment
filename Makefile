@@ -1,10 +1,11 @@
 build:
-	go build -ldflags="-s -w" -o bin/history history/*
-	go build -ldflags="-s -w" -o bin/send send/*
+	go build -ldflags="-s -w" -o bin/history api/history/*
+	go build -ldflags="-s -w" -o bin/send api/send/*
+	go build -ldflags="-s -w" -o bin/sender jobs/sender/*
 
 test:
-	go test ./history
-	go test ./send
+	go test ./api/*
+	go test ./jobs/*
 
 clean:
 	rm -rf ./bin
