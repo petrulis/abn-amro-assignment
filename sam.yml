@@ -137,7 +137,7 @@ Resources:
       Environment:
         Variables:
           REGION:
-            Fn::Sub: "${AWS:Region}"
+            Fn::Sub: "${AWS::Region}"
           DDB_TABLE:
             Ref: MessageRequestTable
   Send:
@@ -173,7 +173,7 @@ Resources:
       Environment:
         Variables:
           REGION:
-            Fn::Sub: "${AWS:Region}"
+            Fn::Sub: "${AWS::Region}"
           DDB_TABLE:
             Ref: MessageRequestTable
           DEFAULT_REGION: US
