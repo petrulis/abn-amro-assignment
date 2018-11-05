@@ -154,6 +154,7 @@ Resources:
                   - 'dynamodb:UpdateTable'
                   - 'dynamodb:CreateTable'
                   - 'application-autoscaling:*'
+                  - 'events:*'
               - Effect: Allow
                 Action:
                   - 'apigateway:*'
