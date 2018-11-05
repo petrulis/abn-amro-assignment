@@ -50,7 +50,7 @@ func Handler(event events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: err.Error()}, nil
 	}
-	return events.APIGatewayProxyResponse{}, nil
+	return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: string(request.Marshal())}, nil
 }
 
 func main() {

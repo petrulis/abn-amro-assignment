@@ -50,5 +50,11 @@ type MessageRequest struct {
 	Body                string `json:"Body"`
 }
 
+// Marshal serializes the MessageRequest to json byte array
+func (r *MessageRequest) Marshal() []byte {
+	b, _ := json.Marshal(r)
+	return b
+}
+
 // MessageRequestList represents a list of MessageRequest items
 type MessageRequestList []*MessageRequest
