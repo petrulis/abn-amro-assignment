@@ -38,6 +38,7 @@ func Handler(event events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: string(errors.Marshal())}, nil
 	}
 	request.RequestID = uuid.New().String()
+	request.DeliveryStatus = model.DeliveryStatusScheduled
 	item, err := dynamodbattribute.MarshalMap(&request)
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: err.Error()}, nil

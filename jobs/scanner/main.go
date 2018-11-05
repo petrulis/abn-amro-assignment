@@ -38,7 +38,7 @@ func Handler() error {
 		},
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":t": {N: aws.String(strconv.FormatInt(now, 10))},
-			":d": {S: aws.String("Scheduled")},
+			":d": {S: aws.String(model.DeliveryStatusScheduled)},
 		},
 		FilterExpression: aws.String("#t <= :t AND #d = :d"),
 	}

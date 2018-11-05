@@ -6,8 +6,11 @@ import (
 	"time"
 )
 
-const IdentifierTypeSMS = "sms"
-const IdentifierTypeEmail = "email"
+const (
+	IdentifierTypeSMS = "sms"
+	IdentifierTypeEmail = "email"
+	DeliveryStatusScheduled = "Scheduled"
+)
 
 type ValidationErrors []*ValidationError
 
