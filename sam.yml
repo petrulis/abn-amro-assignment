@@ -229,7 +229,7 @@ Resources:
               Resource: '*'
             - Effect: Allow
               Action:
-                - dynamodb:Query
+                - dynamodb:Scan
               Resource:
                 Fn::GetAtt: [MessageRequestTable, Arn]
             - Effect: Allow
