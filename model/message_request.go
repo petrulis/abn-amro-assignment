@@ -44,10 +44,10 @@ func (v *MessageRequestValidator) Errors() ValidationErrors {
 
 // MessageRequest represents MessageRequest table
 type MessageRequest struct {
-	IdentifierType      string `json:"identifierType"`
-	RecipientIdentifier string `json:"recipientIdentifier"`
-	RequestID           string `json:"requestId"`
-	Body                string `json:"body"`
+	IdentifierType      string `json:"IdentifierType"`
+	RecipientIdentifier string `json:"RecipientIdentifier"`
+	RequestID           string `json:"RequestId"`
+	Body                string `json:"Body"`
 }
 
 // MessageRequestList represents a list of MessageRequest items
