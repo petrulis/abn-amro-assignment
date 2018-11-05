@@ -267,7 +267,7 @@ Resources:
               Resource: '*'
             - Effect: Allow
               Action:
-                - dynamodb:Scan
+                - dynamodb:UpdateItem
               Resource:
                 Fn::GetAtt: [MessageRequestTable, Arn]
             - Effect: Allow
