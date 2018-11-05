@@ -1,5 +1,14 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
+Parameters:
+  Env:
+    Type: String
+  Name:
+    Type: String
+  MinimumCompressionSize:
+    Type: Number
+  TableName:
+    Type: String
 Resources:
   MessageRequestTable:
     Type: 'AWS::DynamoDB::Table'
