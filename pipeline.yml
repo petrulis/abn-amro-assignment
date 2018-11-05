@@ -188,7 +188,7 @@ Resources:
               - 's3:GetObjectVersion'
             Resource:
               - Fn::Sub: 'arn:aws:s3:::${ArtifactStore}/*'
-              - 'arn:aws:s3:::abn-ambro-deployment-bucket/*'
+              - Fn::Sub: 'arn:aws:s3:::${TemplateBucket}/*'
       ServiceName:
         Fn::Sub: 'com.amazonaws.${AWS::Region}.s3'
       RouteTableIds:
@@ -199,7 +199,7 @@ Resources:
     Type: 'AWS::S3::Bucket'
     Properties: {}
   ArtifactStorePolicy:
-    Type: AWS::S3::BucketPolicy
+    Type: 'AWS::S3::BucketPolicy'
     Properties:
       Bucket:
         Ref: ArtifactStore
@@ -213,6 +213,27 @@ Resources:
             Effect: "Allow"
             Resource:
               Fn::Sub: 'arn:aws:s3:::${ArtifactStore}/*'
+            Principal: "*"
+            Condition:
+              StringEquals:
+                aws:sourceVpce:
+                  - !Ref VpcEndpoint
+  TemplateBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties: {}
+  TemplateBucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket:
+        Ref: TemplateBucket
+      PolicyDocument:
+        Statement:
+          -
+            Action:
+              - 's3:PutObject'
+            Effect: "Allow"
+            Resource:
+              Fn::Sub: 'arn:aws:s3:::${TemplateBucket}/*'
             Principal: "*"
             Condition:
               StringEquals:

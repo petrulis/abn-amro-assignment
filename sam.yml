@@ -1,6 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
 Resources:
   History:
+    Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
       Events:
@@ -16,8 +18,10 @@ Resources:
           Type: Api
       Handler: bin/history
       Runtime: go1.x
-    Type: AWS::Serverless::Function
+      Policies:
+       - AWSLambdaExecute
   Send:
+    Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
       Events:
@@ -33,5 +37,5 @@ Resources:
           Type: Api
       Handler: bin/send
       Runtime: go1.x
-    Type: AWS::Serverless::Function
-Transform: AWS::Serverless-2016-10-31
+      Policies:
+       - AWSLambdaExecute

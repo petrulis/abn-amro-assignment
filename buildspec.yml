@@ -1,12 +1,25 @@
 version: 0.2
+env:
+  variables:
+    PACKAGE: "github.com/petrulis/abn-amro-assignment"
+    BUCKET: "abn-amro-pipeline-templatebucket-ahmq4kn3umy0"
 phases:
+  install:
+    commands:
+      - export GOPATH=/go
+      - mkdir -p "/go/src/$(dirname ${PACKAGE})"
+      - ln -s "${CODEBUILD_SRC_DIR}" "/go/src/${PACKAGE}"
+      - env
+      - go get -u github.com/golang/lint/golint
   pre_build:
     commands:
+      - cd "/go/src/${PACKAGE}"
       - dep ensure
+      - golint -set_exit_status
   build:
     commands:
       - make build
-      - aws cloudformation package --template-file sam.yml --s3-bucket abn-ambro-deployment-bucket --output-template-file output.yml
+      - aws cloudformation package --template-file sam.yml --s3-bucket ${BUCKET} --output-template-file output.yml
 artifacts:
   type: zip
   files:
