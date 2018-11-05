@@ -1,61 +1,40 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/sqs"
-	"github.com/petrulis/abn-amro-assignment/model"
+	"github.com/petrulis/abn-amro-assignment/dynamodbdriver"
 	"os"
-	"strconv"
 	"time"
 )
 
-var ddb *dynamodb.DynamoDB
-var sqc *sqs.SQS
-var tbl *string
-var defaultRegion string
-var queueUrl *string
+var (
+	sqc      *sqs.SQS
+	queueUrl *string
+	dd       *dynamodbdriver.DynamoDbDriver
+)
 
 func init() {
 	sess := session.Must(session.NewSession(&aws.Config{Region: aws.String(os.Getenv("REGION"))}))
-	ddb = dynamodb.New(sess)
-	tbl = aws.String(os.Getenv("DDB_TABLE"))
 	sqc = sqs.New(sess)
 	queueUrl = aws.String(os.Getenv("QUEUE_URL"))
+	dd = dynamodbdriver.New(sess, &dynamodbdriver.DriverConfig{
+		MessageRequestTable: aws.String(os.Getenv("DDB_TABLE")),
+	})
 }
 
 func Handler() error {
-	now := time.Now().Unix()
-	input := &dynamodb.ScanInput{
-		TableName: tbl,
-		ExpressionAttributeNames: map[string]*string{
-			"#t": aws.String("SendAt"),
-			"#d": aws.String("DeliveryStatus"),
-		},
-		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":t": {N: aws.String(strconv.FormatInt(now, 10))},
-			":d": {S: aws.String(model.DeliveryStatusScheduled)},
-		},
-		FilterExpression: aws.String("#t <= :t AND #d = :d"),
-	}
-	out, err := ddb.Scan(input)
+	reqs, err := dd.FindScheduled(time.Now())
 	if err != nil {
 		return err
 	}
-	var requests model.MessageRequestList
-	err = dynamodbattribute.UnmarshalListOfMaps(out.Items, &requests)
-	if err != nil {
-		return err
-	}
-	for _, request := range requests {
-		b, _ := json.Marshal(&request)
+	for _, req := range reqs {
+		body := req.Marshal()
 		input := &sqs.SendMessageInput{
 			QueueUrl:    queueUrl,
-			MessageBody: aws.String(string(b)),
+			MessageBody: aws.String(string(body)),
 		}
 		sqc.SendMessage(input)
 	}

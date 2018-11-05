@@ -6,52 +6,47 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"github.com/google/uuid"
+	"github.com/petrulis/abn-amro-assignment/dynamodbdriver"
 	"github.com/petrulis/abn-amro-assignment/model"
+	"github.com/petrulis/abn-amro-assignment/validator"
 	"net/http"
 	"os"
+	"github.com/google/uuid"
 )
 
-var ddb *dynamodb.DynamoDB
-var tbl *string
-var defaultRegion string
+var (
+	dd            *dynamodbdriver.DynamoDbDriver
+	defaultRegion string
+)
 
 func init() {
 	sess := session.Must(session.NewSession(&aws.Config{Region: aws.String(os.Getenv("REGION"))}))
-	ddb = dynamodb.New(sess)
-	tbl = aws.String(os.Getenv("DDB_TABLE"))
 	defaultRegion = os.Getenv("DEFAULT_REGION")
+	dd = dynamodbdriver.New(sess, &dynamodbdriver.DriverConfig{
+		MessageRequestTable: aws.String(os.Getenv("DDB_TABLE")),
+	})
 }
 
 func Handler(event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	var request model.MessageRequest
-	err := json.Unmarshal([]byte(event.Body), &request)
+	var req model.MessageRequest
+	err := json.Unmarshal([]byte(event.Body), &req)
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: err.Error()}, nil
 	}
-	validator := model.NewMessageRequestValidator(defaultRegion)
-	ok := validator.Validate(&request)
+	v := validator.NewMessageRequestValidator(defaultRegion)
+	ok := v.Validate(&req)
 	if !ok {
-		errors := validator.Errors()
+		errors := v.Errors()
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: string(errors.Marshal())}, nil
 	}
-	request.RequestID = uuid.New().String()
-	request.DeliveryStatus = model.DeliveryStatusScheduled
-	item, err := dynamodbattribute.MarshalMap(&request)
-	if err != nil {
+	req.RequestID = uuid.New().String()
+	req.DeliveryStatus = model.DeliveryStatusScheduled
+	dd.Save(&req)
+	if err = dd.Save(&req); err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: err.Error()}, nil
 	}
-	input := &dynamodb.PutItemInput{
-		TableName: tbl,
-		Item:      item,
-	}
-	_, err = ddb.PutItem(input)
-	if err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: err.Error()}, nil
-	}
-	return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: string(request.Marshal())}, nil
+	body := string(req.Marshal())
+	return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: body}, nil
 }
 
 func main() {
