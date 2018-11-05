@@ -98,10 +98,19 @@ Resources:
                 ActionMode: CHANGE_SET_EXECUTE
                 ChangeSetName: ChangeSet
                 RoleArn:
-                    Fn::GetAtt: [CloudFormationRole, Arn]
+                  Fn::GetAtt: [CloudFormationRole, Arn]
                 StackName:
-                    Ref: StackName
+                  Ref: StackName
                 Capabilities: CAPABILITY_IAM
+                ParameterOverrides:
+                  Env:
+                    Fn::GetParam: ["BuildOutput", "params.json", "Env"]
+                  Name:
+                    Fn::GetParam: ["BuildOutput", "params.json", "Name"]
+                  MinimumCompressionSize:
+                    Fn::GetParam: ["BuildOutput", "params.json", "MinimumCompressionSize"]
+                  TableName:
+                    Fn::GetParam: ["BuildOutput", "params.json", "TableName"]
               RunOrder: 2
   CloudFormationRole:
     Type: 'AWS::IAM::Role'

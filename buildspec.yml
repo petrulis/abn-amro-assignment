@@ -3,6 +3,7 @@ env:
   variables:
     PACKAGE: "github.com/petrulis/abn-amro-assignment"
     BUCKET: "abn-amro-pipeline-templatebucket-ahmq4kn3umy0"
+    TABLE_NAME: "MessageRequest"
 phases:
   install:
     commands:
@@ -20,8 +21,13 @@ phases:
     commands:
       - make build
       - aws cloudformation package --template-file sam.yml --s3-bucket ${BUCKET} --output-template-file output.yml
+  post_build:
+    commands:
+      - printf '{"Env":"%s","TableName":"%s"}' "$ENV" "$TABLE_NAME" > params.json
+      - cat params.json
 artifacts:
   type: zip
   files:
     - sam.yml
     - output.yml
+    - params.json

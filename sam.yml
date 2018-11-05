@@ -3,10 +3,6 @@ Transform: AWS::Serverless-2016-10-31
 Parameters:
   Env:
     Type: String
-  Name:
-    Type: String
-  MinimumCompressionSize:
-    Type: Number
   TableName:
     Type: String
 Resources:
