@@ -107,7 +107,7 @@ func (d *DynamoDbDriver) newFindByRequestIdentifierQueryInput(rid *string, exclu
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":rid": {S: rid},
 		},
-		KeyConditionExpression: aws.String("#rid := rid"),
+		KeyConditionExpression: aws.String("#rid = :rid"),
 		Limit:                  aws.Int64(10),
 	}
 	if exclusiveStartKey != nil {
