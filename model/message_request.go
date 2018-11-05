@@ -32,7 +32,7 @@ func (v *MessageRequestValidator) Validate(request *MessageRequest) bool {
 	if v.validateIdentifier(request) == false {
 		return false
 	}
-	now := time.Now()
+	now := time.Now().UTC()
 	if now.Unix() < request.SendAt {
 		return false
 	}
