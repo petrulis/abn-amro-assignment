@@ -48,14 +48,20 @@
     "service/dynamodb/dynamodbattribute",
     "service/sts"
   ]
-  revision = "f76d9803fd695eebf74cb23c460287fa496efc21"
-  version = "v1.15.63"
+  revision = "3264db248fe8d241f6949ed35e33b11c0aec3c93"
+  version = "v1.15.68"
 
 [[projects]]
   name = "github.com/golang/protobuf"
   packages = ["proto"]
   revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
   version = "v1.2.0"
+
+[[projects]]
+  name = "github.com/google/uuid"
+  packages = ["."]
+  revision = "d460ce9f8df2e77fb1ba55ca87fafed96c607494"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/jmespath/go-jmespath"
@@ -77,6 +83,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2dd8d44a31d4afb8fac007aa1daa1b079f1959244524968f46f0397f327d2bb8"
+  inputs-digest = "53c5f5fa3a2b3468189373aeafef588201135fd387b99ca22add63db936e00a0"
   solver-name = "gps-cdcl"
   solver-version = 1

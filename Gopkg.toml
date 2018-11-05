@@ -31,7 +31,15 @@
 
 [[constraint]]
   name = "github.com/aws/aws-sdk-go"
-  version = "1.15.63"
+  version = "1.15.68"
+
+[[constraint]]
+  name = "github.com/google/uuid"
+  version = "1.0.0"
+
+[[constraint]]
+  name = "github.com/ttacon/libphonenumber"
+  version = "1.0.0"
 
 [prune]
   go-tests = true

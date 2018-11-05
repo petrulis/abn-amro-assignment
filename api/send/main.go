@@ -11,6 +11,7 @@ import (
 	"os"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/google/uuid"
 )
 
 var ddb *dynamodb.DynamoDB
@@ -36,6 +37,7 @@ func Handler(event events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 		errors := validator.Errors()
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: string(errors.Marshal())}, nil
 	}
+	request.RequestID = uuid.New().String()
 	item, err := dynamodbattribute.MarshalMap(&request)
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: err.Error()}, nil
