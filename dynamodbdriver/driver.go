@@ -122,7 +122,7 @@ func (d *DynamoDbDriver) newFindScheduledScanInput(now time.Time) *dynamodb.Scan
 		},
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":t": {N: aws.String(strconv.FormatInt(now.Unix(), 10))},
-			":s": {S: aws.String(model.DeliveryStatusScheduled)},
+			":s": {S: aws.String(model.DeliveryStatusSent)},
 			":q": {S: aws.String(model.DeliveryStatusQueued)},
 		},
 		FilterExpression: aws.String("#t <= :t AND #d <> :s AND #d <> :q"),
