@@ -1,17 +1,17 @@
 package main
 
 import (
-	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"os"
-	"github.com/aws/aws-sdk-go/aws"
 	"context"
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/petrulis/abn-amro-assignment/model"
 	"encoding/json"
-	"github.com/go-errors/errors"
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/sns"
+	"github.com/go-errors/errors"
+	"github.com/petrulis/abn-amro-assignment/model"
+	"os"
 )
 
 var ddb *dynamodb.DynamoDB
@@ -28,7 +28,7 @@ func init() {
 func sendSMS(request *model.MessageRequest) error {
 	input := &sns.PublishInput{
 		PhoneNumber: aws.String(request.RecipientIdentifier),
-		Message: aws.String(request.Body),
+		Message:     aws.String(request.Body),
 	}
 	_, err := snc.Publish(input)
 	return err
@@ -36,6 +36,25 @@ func sendSMS(request *model.MessageRequest) error {
 
 func sendEmail(request *model.MessageRequest) error {
 	return nil
+}
+
+func updateStatus(request *model.MessageRequest) error {
+	input := &dynamodb.UpdateItemInput{
+		TableName: tbl,
+		Key: map[string]*dynamodb.AttributeValue{
+			"RecipientIdentifier": {S: aws.String(request.RecipientIdentifier)},
+			"RequestId":           {S: aws.String(request.RequestID)},
+		},
+		ExpressionAttributeNames: map[string]*string{
+			"#d": aws.String("DeliveryStatus"),
+		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":d": {S: aws.String(model.DeliveryStatusSent)},
+		},
+		UpdateExpression: aws.String("#d = :d"),
+	}
+	_, err := ddb.UpdateItem(input)
+	return err
 }
 
 func send(request *model.MessageRequest) error {
@@ -58,6 +77,10 @@ func Handler(ctx context.Context, event events.SQSEvent) error {
 			return err
 		}
 		err = send(&request)
+		if err != nil {
+			return err
+		}
+		err = updateStatus(&request)
 		if err != nil {
 			return err
 		}

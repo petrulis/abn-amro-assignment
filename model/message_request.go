@@ -7,9 +7,10 @@ import (
 )
 
 const (
-	IdentifierTypeSMS = "sms"
-	IdentifierTypeEmail = "email"
+	IdentifierTypeSMS       = "sms"
+	IdentifierTypeEmail     = "email"
 	DeliveryStatusScheduled = "Scheduled"
+	DeliveryStatusSent      = "Sent"
 )
 
 type ValidationErrors []*ValidationError

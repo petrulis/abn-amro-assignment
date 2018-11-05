@@ -1,17 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"os"
 	"github.com/aws/aws-sdk-go/aws"
-	"time"
-	"strconv"
-	"github.com/petrulis/abn-amro-assignment/model"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/sqs"
-	"encoding/json"
+	"github.com/petrulis/abn-amro-assignment/model"
+	"os"
+	"strconv"
+	"time"
 )
 
 var ddb *dynamodb.DynamoDB
@@ -54,7 +54,7 @@ func Handler() error {
 	for _, request := range requests {
 		b, _ := json.Marshal(&request)
 		input := &sqs.SendMessageInput{
-			QueueUrl: queueUrl,
+			QueueUrl:    queueUrl,
 			MessageBody: aws.String(string(b)),
 		}
 		sqc.SendMessage(input)
