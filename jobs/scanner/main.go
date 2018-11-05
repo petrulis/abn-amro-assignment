@@ -34,11 +34,13 @@ func Handler() error {
 		TableName: tbl,
 		ExpressionAttributeNames: map[string]*string{
 			"#t": aws.String("SendAt"),
+			"#d": aws.String("DeliveryStatus"),
 		},
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":t": {N: aws.String(strconv.FormatInt(now, 10))},
+			":d": {S: aws.String("Scheduled")},
 		},
-		FilterExpression: aws.String("#t <= :t"),
+		FilterExpression: aws.String("#t <= :t AND #d = :d"),
 	}
 	out, err := ddb.Scan(input)
 	if err != nil {
