@@ -28,7 +28,7 @@ func Handler(event events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	var request model.MessageRequest
 	err := json.Unmarshal([]byte(event.Body), &request)
 	if err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest}, nil
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: err.Error()}, nil
 	}
 	validator := model.NewMessageRequestValidator(defaultRegion)
 	ok := validator.Validate(&request)
@@ -38,7 +38,7 @@ func Handler(event events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	}
 	item, err := dynamodbattribute.MarshalMap(&request)
 	if err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest}, nil
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: err.Error()}, nil
 	}
 	input := &dynamodb.PutItemInput{
 		TableName: tbl,
@@ -46,7 +46,7 @@ func Handler(event events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	}
 	_, err = ddb.PutItem(input)
 	if err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest}, nil
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: err.Error()}, nil
 	}
 	return events.APIGatewayProxyResponse{}, nil
 }
