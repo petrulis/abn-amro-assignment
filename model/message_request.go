@@ -20,22 +20,23 @@ const (
 	// DeliveryStatusSent represents message delivery state
 	// when MessageRequest is already persisted, queued and sent
 	// via one of supported delivery channels.
-	DeliveryStatusSent      = "Sent"
+	DeliveryStatusSent = "Sent"
 
 	// DeliveryStatusQueued represents message delivery state
 	// when MessageRequest is already persisted and queued but
 	// not sent yet.
-	DeliveryStatusQueued    = "Queued"
+	DeliveryStatusQueued = "Queued"
 )
 
 // MessageRequest represents MessageRequest table.
 type MessageRequest struct {
 	IdentifierType      string `json:"IdentifierType"`
 	RecipientIdentifier string `json:"RecipientIdentifier"`
-	RequestID           string `json:"RequestId"`
+	RequestID           string `json:"RequestId" valid:"readonly"`
 	Body                string `json:"Body"`
 	SendAt              int64  `json:"SendAt"`
-	DeliveryStatus      string `json:"DeliveryStatus"`
+	Subject             string `json:"Subject"`
+	DeliveryStatus      string `json:"DeliveryStatus" valid:"readonly"`
 }
 
 // NewMessageRequestFromString creates new MessageRequest from string.

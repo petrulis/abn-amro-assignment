@@ -33,7 +33,7 @@ func (s *SMSSender) Send(request *model.MessageRequest) error {
 // EmailSenderConfig represents EmailSender condfiguration.
 type EmailSenderConfig struct {
 	// CharSet represents message and subject encoding.
-	CharSet    *string
+	CharSet *string
 
 	// SenderName represents email from which new message can be sent.
 	SenderName *string

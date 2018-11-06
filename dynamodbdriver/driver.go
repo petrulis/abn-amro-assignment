@@ -1,6 +1,7 @@
 package dynamodbdriver
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -8,7 +9,6 @@ import (
 	"github.com/petrulis/abn-amro-assignment/model"
 	"strconv"
 	"time"
-	"fmt"
 )
 
 // DynamoDbDriver provides handy operation methods for making requests to
@@ -108,7 +108,7 @@ func (d *DynamoDbDriver) newFindByRequestIdentifierQueryInput(rid *string, exclu
 			":rid": {S: rid},
 		},
 		KeyConditionExpression: aws.String("#rid = :rid"),
-		Limit:                  aws.Int64(10),
+		Limit: aws.Int64(10),
 	}
 	if exclusiveStartKey != nil {
 		input.ExclusiveStartKey = exclusiveStartKey.MarshalMap()
