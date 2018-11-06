@@ -22,10 +22,10 @@ func NewSMSSender(sess *session.Session) *SMSSender {
 }
 
 // Send publishes new message to Amazon SNS.
-func (s *SMSSender) Send(request *model.MessageRequest) error {
+func (s *SMSSender) Send(req *model.MessageRequest) error {
 	input := &sns.PublishInput{
-		PhoneNumber: aws.String(request.RecipientIdentifier),
-		Message:     aws.String(request.Body),
+		PhoneNumber: aws.String(req.RecipientIdentifier),
+		Message:     aws.String(req.Body),
 	}
 	_, err := s.client.Publish(input)
 	fmt.Println(err)
@@ -64,21 +64,21 @@ func (s *EmailSender) Send(request *model.MessageRequest) error {
 }
 
 // newSendEmailInput creates new Amazon SES SendEmailInput from MessageRequest.
-func (s *EmailSender) newSendEmailInput(request *model.MessageRequest) *ses.SendEmailInput {
+func (s *EmailSender) newSendEmailInput(req *model.MessageRequest) *ses.SendEmailInput {
 	html := &ses.Content{
 		Charset: s.cfg.CharSet,
-		Data:    aws.String(request.Body),
+		Data:    aws.String(req.Body),
 	}
 	body := &ses.Body{Html: html}
 	subject := &ses.Content{
 		Charset: s.cfg.CharSet,
-		Data:    aws.String(""),
+		Data:    aws.String(req.Subject),
 	}
 	message := &ses.Message{
 		Body: body, Subject: subject,
 	}
 	destination := &ses.Destination{
-		ToAddresses: []*string{aws.String(request.RecipientIdentifier)},
+		ToAddresses: []*string{aws.String(req.RecipientIdentifier)},
 	}
 	input := &ses.SendEmailInput{
 		Destination: destination,
