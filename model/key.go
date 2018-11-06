@@ -46,3 +46,8 @@ func (k *Key) EncodeBase64() string {
 	b, _ := json.Marshal(k)
 	return base64.StdEncoding.EncodeToString(b)
 }
+
+// IsEmpty checks whether the key has values.
+func (k *Key) IsEmpty() bool {
+	return k.RecipientIdentifier == nil && k.RequestID == nil
+}
