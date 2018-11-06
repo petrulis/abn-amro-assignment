@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aws/aws-sdk-go/service/sns"
 	"github.com/petrulis/abn-amro-assignment/model"
+	"fmt"
 )
 
 // SMSSender represents SMS delivery method.
@@ -27,6 +28,7 @@ func (s *SMSSender) Send(request *model.MessageRequest) error {
 		Message:     aws.String(request.Body),
 	}
 	_, err := s.client.Publish(input)
+	fmt.Println(err)
 	return err
 }
 
@@ -57,6 +59,7 @@ func NewEmailSender(sess *session.Session, cfg *EmailSenderConfig) *EmailSender 
 func (s *EmailSender) Send(request *model.MessageRequest) error {
 	input := s.newSendEmailInput(request)
 	_, err := s.client.SendEmail(input)
+	fmt.Println(err)
 	return err
 }
 
