@@ -18,7 +18,7 @@ func newResponse(list model.MessageRequestList, lastEvaluatedKey *model.Key) *re
 		Items: list,
 		Count: len(list),
 	}
-	if lastEvaluatedKey != nil {
+	if lastEvaluatedKey != nil && !lastEvaluatedKey.IsEmpty() {
 		nextToken := lastEvaluatedKey.EncodeBase64()
 		resp.NextToken = aws.String(nextToken)
 	}
