@@ -53,7 +53,6 @@ func Handler(event events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	}
 	req.RequestID = uuid.New().String()
 	req.DeliveryStatus = model.DeliveryStatusScheduled
-	dd.Save(&req)
 	if err = dd.Save(&req); err != nil {
 		return api.NewProxyErrorResponse(api.ErrInternal), nil
 	}
