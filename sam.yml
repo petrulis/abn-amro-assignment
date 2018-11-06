@@ -278,6 +278,7 @@ Resources:
             - Effect: Allow
               Action:
                 - sns:Publish
+                - ses:SendEmail
               Resource: "*"
       Environment:
         Variables:
