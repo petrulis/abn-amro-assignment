@@ -30,7 +30,7 @@ func init() {
 //   * ErrBadRequest
 //   Provided request payload was incorrect and therefore couldn't be processed.
 func Handler(event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	rid, ok := event.QueryStringParameters["requestIdentifier"]
+	rid, ok := event.QueryStringParameters["recipientIdentifier"]
 	if !ok {
 		return api.NewProxyErrorResponse(api.ErrBadRequest), nil
 	}
