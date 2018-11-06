@@ -75,7 +75,7 @@ func (v *MessageRequestValidator) validateIdentifier(req *model.MessageRequest) 
 		_, err := libphonenumber.Parse(req.RecipientIdentifier, v.defaultRegion)
 		if err != nil {
 			v.errors = append(v.errors, &ValidationError{
-				Message: fmt.Sprint("Given RecipientIdentifier is not valid phone number"),
+				Message: fmt.Sprint("Given `RecipientIdentifier` is not valid phone number"),
 				Code:    "InvalidPhoneNumber",
 			})
 		}
@@ -83,16 +83,16 @@ func (v *MessageRequestValidator) validateIdentifier(req *model.MessageRequest) 
 	} else if req.IdentifierType == model.IdentifierTypeEmail {
 		rgx := regexp.MustCompile(emailRegex)
 		ok := rgx.MatchString(req.RecipientIdentifier)
-		if ok {
+		if !ok {
 			v.errors = append(v.errors, &ValidationError{
-				Message: fmt.Sprint("Given RecipientIdentifier is not valid email address"),
+				Message: fmt.Sprint("Given `RecipientIdentifier` is not valid email address"),
 				Code:    "InvalidEmailAddress",
 			})
 		}
 		return ok
 	} else {
 		v.errors = append(v.errors, &ValidationError{
-			Message: fmt.Sprint("Given RecipientIdentifier is not valid identifier. Valid values: sms, email"),
+			Message: fmt.Sprint("Given `RecipientIdentifier` is not valid identifier. Valid values: sms, email"),
 			Code:    "InvalidRequestIdentifier",
 		})
 		return false
