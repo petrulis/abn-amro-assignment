@@ -1,5 +1,10 @@
 # ABN AMRO Assignment
 
+### Disclaimer
+
+This is experimental tool to send SMS or email messages via Amazon SES or SNS. This is not yet
+production ready.
+
 ## Architecture
 
 Service infrastructure is based on Amazon Serverless Application Model therefore API
@@ -14,7 +19,7 @@ recipientIdentifier.
 4. SQS queue which contains send requests.
 5. Lambda function to send message via two different distribution channels (sms and email).
 6. SNS is used as distribution channel for SMS messages.
-7. SES is used as distribtion channel for emails.
+7. SES is used as distribution channel for emails.
 
 ![Diagram](/docs/architecture.png)
 
