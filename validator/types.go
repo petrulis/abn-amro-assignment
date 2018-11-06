@@ -38,20 +38,20 @@ func (v *MessageRequestValidator) Validate(req *model.MessageRequest) bool {
 	v.validateIdentifier(req)
 	if req.RequestID != "" {
 		v.errors = append(v.errors, &ValidationError{
-			Message: fmt.Sprint("Trying to update read-only attribute."),
+			Message: fmt.Sprint("Trying to update read-only attribute"),
 			Code:    "InvalidRequestId",
 		})
 	}
 	now := time.Now().UTC()
 	if now.Unix() > req.SendAt {
 		v.errors = append(v.errors, &ValidationError{
-			Message: fmt.Sprint("Given attribute `SendAt` is not valid timestamp."),
+			Message: fmt.Sprint("Given attribute `SendAt` is not valid timestamp"),
 			Code:    "InvalidSendAt",
 		})
 	}
 	if req.DeliveryStatus != "" {
 		v.errors = append(v.errors, &ValidationError{
-			Message: fmt.Sprint("Trying to update read-only attribute."),
+			Message: fmt.Sprint("Trying to update read-only attribute"),
 			Code:    "InvalidDeliveryStatus",
 		})
 	}
@@ -75,20 +75,21 @@ func (v *MessageRequestValidator) validateIdentifier(req *model.MessageRequest) 
 		_, err := libphonenumber.Parse(req.RecipientIdentifier, v.defaultRegion)
 		if err != nil {
 			v.errors = append(v.errors, &ValidationError{
-				Message: fmt.Sprint("Given RecipientIdentifier is not valid phone number."),
+				Message: fmt.Sprint("Given RecipientIdentifier is not valid phone number"),
 				Code:    "InvalidPhoneNumber",
 			})
 		}
 		return err == nil
 	} else if req.IdentifierType == model.IdentifierTypeEmail {
-		_, err := regexp.Compile(emailRegex)
-		if err != nil {
+		rgx := regexp.MustCompile(emailRegex)
+		ok := rgx.MatchString(req.RecipientIdentifier)
+		if ok {
 			v.errors = append(v.errors, &ValidationError{
-				Message: fmt.Sprint("Given RecipientIdentifier is not valid email address."),
+				Message: fmt.Sprint("Given RecipientIdentifier is not valid email address"),
 				Code:    "InvalidEmailAddress",
 			})
 		}
-		return err != nil
+		return ok
 	} else {
 		v.errors = append(v.errors, &ValidationError{
 			Message: fmt.Sprint("Given RecipientIdentifier is not valid identifier. Valid values: sms, email"),
