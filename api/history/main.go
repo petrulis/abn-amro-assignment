@@ -25,7 +25,8 @@ func init() {
 	})
 }
 
-// Handler validates incoming MessageRequest and stores into Amazon DynamoDB database.
+// Handler validates incoming request and searches for MessageRequests by RecipientIdentifier
+// and base64 encoded token.
 // Returned Error Codes:
 //   * ErrBadRequest
 //   Provided request payload was incorrect and therefore couldn't be processed.
