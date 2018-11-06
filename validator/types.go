@@ -13,6 +13,7 @@ const (
 	emailRegex = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
 )
 
+// ValidationErrors represents multiple ValidationError.
 type ValidationErrors []*ValidationError
 
 func (e *ValidationErrors) Marshal() []byte {
@@ -20,20 +21,28 @@ func (e *ValidationErrors) Marshal() []byte {
 	return out
 }
 
+// ValidatorError represents MessageRquest validation error.
 type ValidationError struct {
+	// Message represents validation message.
 	Message string
+
+	// Code represents error code.
 	Code    string
 }
 
+// MessageRequestValidator represents validator which validates
+// MessageRequest.
 type MessageRequestValidator struct {
 	defaultRegion string
 	errors        ValidationErrors
 }
 
+// NewMessageRequestValidator creates new MessageRequestValidator.
 func NewMessageRequestValidator(defaultRegion string) *MessageRequestValidator {
 	return &MessageRequestValidator{defaultRegion: defaultRegion}
 }
 
+// Validate validates MessageRequest.
 func (v *MessageRequestValidator) Validate(req *model.MessageRequest) bool {
 	v.validateIdentifier(req)
 	if req.RequestID != "" {
@@ -70,6 +79,7 @@ func (v *MessageRequestValidator) Validate(req *model.MessageRequest) bool {
 	return len(v.errors) == 0
 }
 
+// validateIdentifier validates message request identifier.
 func (v *MessageRequestValidator) validateIdentifier(req *model.MessageRequest) bool {
 	if req.IdentifierType == model.IdentifierTypeSMS {
 		_, err := libphonenumber.Parse(req.RecipientIdentifier, v.defaultRegion)
@@ -99,6 +109,7 @@ func (v *MessageRequestValidator) validateIdentifier(req *model.MessageRequest) 
 	}
 }
 
+// Errors returns ValidationErrors.
 func (v *MessageRequestValidator) Errors() ValidationErrors {
 	return v.errors
 }

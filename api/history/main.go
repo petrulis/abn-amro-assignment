@@ -5,9 +5,9 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/petrulis/abn-amro-assignment/api"
 	"github.com/petrulis/abn-amro-assignment/dynamodbdriver"
 	"github.com/petrulis/abn-amro-assignment/model"
-	"net/http"
 	"os"
 )
 
@@ -15,6 +15,7 @@ var (
 	dd *dynamodbdriver.DynamoDbDriver
 )
 
+// init initializes long lived resources for Handler.
 func init() {
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("REGION")),
@@ -24,27 +25,30 @@ func init() {
 	})
 }
 
-// Handler ...
+// Handler validates incoming MessageRequest and stores into Amazon DynamoDB database.
+// Returned Error Codes:
+//   * ErrBadRequest
+//   Provided request payload was incorrect and therefore couldn't be processed.
 func Handler(event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	rid, ok := event.QueryStringParameters["requestIdentifier"]
 	if !ok {
-		return events.APIGatewayProxyResponse{StatusCode: errBadRequest.GetStatusCode(), Body: errBadRequest.GetJSON()}, nil
+		return api.NewProxyErrorResponse(api.ErrBadRequest), nil
 	}
 	token, ok := event.QueryStringParameters["token"]
 	var exclusiveStartKey *model.Key
 	if ok {
 		key, err := model.NewKeyFromString(token)
 		if err != nil {
-			return events.APIGatewayProxyResponse{StatusCode: errBadRequest.GetStatusCode(), Body: errBadRequest.GetJSON()}, nil
+			return api.NewProxyErrorResponse(api.ErrInvalidToken), nil
 		}
 		exclusiveStartKey = key
 	}
 	requests, lastEvaluatedKey, err := dd.FindByRecipientIdentifier(aws.String(rid), exclusiveStartKey)
 	if err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: errInternal.GetStatusCode(), Body: errInternal.GetJSON()}, nil
+		return api.NewProxyErrorResponse(api.ErrInternal), nil
 	}
 	response := newResponse(requests, lastEvaluatedKey)
-	return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: response.String()}, nil
+	return api.NewProxyOKResponse(response.Marshal()), nil
 }
 
 func main() {

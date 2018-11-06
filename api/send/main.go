@@ -7,10 +7,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/google/uuid"
+	"github.com/petrulis/abn-amro-assignment/api"
 	"github.com/petrulis/abn-amro-assignment/dynamodbdriver"
 	"github.com/petrulis/abn-amro-assignment/model"
 	"github.com/petrulis/abn-amro-assignment/validator"
-	"net/http"
 	"os"
 )
 
@@ -19,6 +19,7 @@ var (
 	defaultRegion string
 )
 
+// init initializes long lived resources for Handler.
 func init() {
 	sess := session.Must(session.NewSession(&aws.Config{Region: aws.String(os.Getenv("REGION"))}))
 	defaultRegion = os.Getenv("DEFAULT_REGION")
@@ -27,26 +28,36 @@ func init() {
 	})
 }
 
+// Handler validates incoming MessageRequest and stores into Amazon DynamoDB database.
+// Returned Error Codes:
+//   * ErrBadRequest
+//   Provided request payload was incorrect and therefore couldn't be processed.
+//
+//   * ErrInternal
+//  The error indicates that something went wrong internally and MessageRequest
+//  couldn't be processed and/or stored into database.
+//
+//   * ErrValidation
+//  The error indicates that request payload couldn't pass MessageRequest validation
+//  checks.
 func Handler(event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var req model.MessageRequest
 	err := json.Unmarshal([]byte(event.Body), &req)
 	if err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: err.Error()}, nil
+		return api.NewProxyErrorResponse(api.ErrBadRequest), nil
 	}
 	v := validator.NewMessageRequestValidator(defaultRegion)
 	ok := v.Validate(&req)
 	if !ok {
-		errors := v.Errors()
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: string(errors.Marshal())}, nil
+		return api.NewBatchedProxyValidationErrorResponse(v.Errors()), nil
 	}
 	req.RequestID = uuid.New().String()
 	req.DeliveryStatus = model.DeliveryStatusScheduled
 	dd.Save(&req)
 	if err = dd.Save(&req); err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: err.Error()}, nil
+		return api.NewProxyErrorResponse(api.ErrInternal), nil
 	}
-	body := string(req.Marshal())
-	return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: body}, nil
+	return api.NewProxyOKResponse(req.Marshal()), nil
 }
 
 func main() {

@@ -1,12 +1,12 @@
 package sender
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aws/aws-sdk-go/service/sns"
 	"github.com/petrulis/abn-amro-assignment/model"
-	"fmt"
 )
 
 // SMSSender represents SMS delivery method.

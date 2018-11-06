@@ -8,11 +8,17 @@ import (
 
 // Response represents operation response
 type response struct {
-	Items     model.MessageRequestList
+	// Items represents a list of MessageRequestItems
+	Items model.MessageRequestList
+
+	// NextToken represents base64 encoded last evaluated key.
 	NextToken *string
-	Count     int
+
+	// Count represents number of items in a response.
+	Count int
 }
 
+// newResponse creates new response instance with items, count and nextToken.
 func newResponse(list model.MessageRequestList, lastEvaluatedKey *model.Key) *response {
 	resp := &response{
 		Items: list,
@@ -25,13 +31,8 @@ func newResponse(list model.MessageRequestList, lastEvaluatedKey *model.Key) *re
 	return resp
 }
 
-// Marshal implements Marshaler
+// Marshal implements Marshal interface
 func (r *response) Marshal() []byte {
 	b, _ := json.Marshal(r)
 	return b
-}
-
-// String implement Stringer
-func (r *response) String() string {
-	return string(r.Marshal())
 }
