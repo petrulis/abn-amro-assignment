@@ -1,5 +1,5 @@
 plugins:
-  ssh: nextprod/ssh@1.0.0
+  ssh: nextprod/ssh@1.0.1
 
 secrets:
   awskey: hashicorpvault://aws/secrets/awskey
