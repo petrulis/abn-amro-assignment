@@ -1,0 +1,258 @@
+plugins:
+  ssh: nextprod/ssh@1.0.0
+
+secrets:
+  awskey: hashicorpvault://aws/secrets/awskey
+  awssecret: hashicorpvault://aws/secrets/awssecret
+  password:
+    auth:
+      role: role
+    arn: arn:xxx:password
+workflows:
+  - name: Development workflow
+    integration:
+      jobs:
+        - build
+      triggers:
+        - pull-request:
+          repository: self
+          branch:
+            include:
+              - test
+              - v1.*
+            exclude:
+              - v1.1
+    delivery:
+      deployment:
+        steps:
+          - oldVersionTarget: 95
+            newVersionTarget: 5
+          - oldVersionTarget: 90
+            newVersionTarget: 10
+          - oldVersionTarget: 70
+            newVersionTarget: 30
+          - oldVersionTarget: 50
+            neeVersionTarget: 50
+          - oldVersionTarget: 40
+            newVersionTarget: 60
+          - oldVersionTarget: 20
+            newVersionTarget: 80
+          - oldVersionTarget: 0
+            newVersionTarget: 100
+        type: ecs | kubernetes | aks | gks | lambda | ec2 | step-functions
+      rollbackConditions:
+        - verification_failed
+        - application_error
+      remediationAction: action
+      verify:
+        warmupTime: 60
+        verificatrors:
+          # AWS Cloudwatch verification provider
+          - provider: cloudwatch
+            auth:
+              role: arn:aws:iam:123456789123:role/NextProdCloudWatchRole
+              credentials:
+                accessKey: secrets.awskey
+                secretKey: secrets.awssecret
+            period: 60
+            verificationDuration: 300
+            baseline: -1
+            metricType: average | minimum | maximum
+            anomalyDetectors:
+              - expression: ANOMALY_DETECTION_BAND(m1,2)
+            anomalyCondition:
+              - aws.ec2.cpuutilization:
+                  dimensions:
+                    instanceId: i-***
+                  standardDeviation: 2
+              - aws.ec2.diskreadbytes:
+                  dimensions:
+                    instanceId: i-*
+                  standardDeviation : 3
+              - custom.memoryusage:
+                  dimensions:
+                    instanceId: i-*
+                  standardDeviation: 2
+    triggers:
+      - pull-request:
+        repository: self
+        branch:
+          include:
+            - test
+            - v1.*
+          exclude:
+            - v1.1
+
+workflows:
+  build-and-test:
+    jobs:
+      - build:
+          properties:
+            dirname: /var/www/html
+            depth: 2
+      - test:
+          properties:
+            complexOnly: true
+    verificationConfiguration:
+      providers:
+        # AWS Cloudwatch verification provider
+        - provider: cloudwatch
+          auth:
+            role: arn:aws:iam:123456789123:role/NextProdCloudWatchRole
+            credentials:
+              accessKey: xxxxxxxxxxxx
+              secretKey: xxxxxxxxxxxx
+          verificationDuration: 300
+          dataBaseline: -1
+          treatMissingDataAs: good
+          deviation: 2
+          anomalyCondition:
+            - aws.ec2.cpuutilization:
+                dimensions:
+                  instanceId: i-***
+                standardDeviation: 2
+            - aws.ec2.diskreadbytes:
+                dimensions:
+                  instanceId: i-*
+                standardDeviation : 3
+            - custom.memoryusage:
+                dimensions:
+                  instamceId: i-*
+                standardDeviation: 2
+        # Datadog verification provider
+        - provider: datadog
+          verificationDuration: 300
+          dataBaseline: -1
+          anomalyCondition:
+            - aws.dynamodb.successful_request_latency:
+                dimesnsions:
+                  TableName: dev-MessageRequest
+                  Operation: Scan
+                moreThan: 400
+        - provider: newrelic
+          verificationDuration: 300
+          dataBaseline: -1
+        - provider: sentry
+        - provider: prometheus
+        - provider: elasticsearch
+        - provider: splunk
+        - provider: sumologic
+        - provider: stackdriver
+        - provider: bugsnag
+        - provider: dynatrace
+        - provider: appdynamics
+        - provider: custom
+    triggers:
+      - pull-request:
+          repository: self
+          branch:
+            include:
+              - test
+              - v1.*
+            exclude:
+              - v1.1
+      - cloudwatch-event:
+          account: 061308674420
+          pattern:
+            - source:
+                - aws.ec2
+              detail:
+                state:
+                  - terminated
+                instance-id:
+                  - i-123456789123
+            - source:
+                - aws.codecommit
+              detail-type:
+                - CodeCommit Repository State Change
+              resources:
+                - arn:aws:codecommit:eu-west-1:061308674420:repo
+              detail:
+                referenceType:
+                  - branch
+                referenceName:
+                  - master
+
+jobs:
+  test:
+    params:
+      complexOnly:
+        type: boolean
+        default: true
+    strategy: ordered
+    order:
+      - go1.11
+      - go1.10
+    machine:
+      docker:
+        image: circleci/golang
+    workdir: /go
+    steps:
+      go1.10:
+        bash: |
+          if [ $COMPLEX ]; then
+              echo Running complex only tests with dataset {{.dataset}}
+          else
+              echo Running all tests with dataset {{.dataset}}
+          fi
+        env:
+          VERSION: go1.10
+      go1.11:
+        bash: |
+          echo Running tests for go 1.11
+        env:
+          VERSION: go1.10
+
+  build:
+    params:
+      dirname:
+        type: string
+        default: /var/www
+      depth:
+        type: number
+    strategy: ordered
+    order:
+      - ssh
+      - clone
+      - deps
+      - build
+      - test
+    machine:
+      packer:
+        builders:
+          - type: amazon-ebs
+            source_ami_filter:
+              filters:
+                - virtualization-type: hvm
+                  name: ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*
+                  root-device-type: ebs
+              most_recent: true
+      docker:
+        image: circleci/golang
+    workdir: /go
+    steps:
+      ssh:
+        task: ssh/add-ssh    
+        properties:
+          fingerprint: 90:11:5c:90:4f:6c:c7:69:48:87:ac:ca:61:8f:a4:c8
+      clone:
+        name: Clone repository
+        bash: |
+          mkdir -p /go/src/github.com/petrulis
+          cd /go/src/github.com/petrulis
+          git clone https://github.com/petrulis/abn-amro-assignment
+      deps:
+        name: Install dependencies
+        bash: |
+          cd /go/src/github.com/petrulis/abn-amro-assignment
+          dep ensure
+      build:
+        name: Make build
+        bash: |
+          cd /go/src/github.com/petrulis/abn-amro-assignment
+          make build
+      test:
+        name: Running tests
+        bash: |
+          cd /go/src/github.com/petrulis/abn-amro-assignment
+          make test
