@@ -172,7 +172,6 @@ workflows:
                   - branch
                 referenceName:
                   - master
-
 jobs:
   test:
     params:
