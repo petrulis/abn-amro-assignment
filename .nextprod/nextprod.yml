@@ -1,6 +1,6 @@
 plugins:
   ssh: nextprod/ssh@1.0.0
-  checkout: nextprod/checkout@1.0.4
+  checkout: nextprod/checkout@1.0.5
 
 #secrets:
 #  awskey: hashicorpvault://aws/secrets/awskey
