@@ -12,38 +12,40 @@ workflows:
   - name: Development workflow
     triggers:
       - provider: github
-        events:
-          - pull_request
-          - push
-        repository: self
-        filters:
-          - type: branch
-            include:
-              - test
-              - v1.*
-            exclude:
-              - v1.1
+	properties:
+	  events:
+	    - pull_request
+	    - push
+	  repository: self
+	  filters:
+	    - type: branch
+	      include:
+	        - test
+	        - v1.*
+	      exclude:
+	        - v1.1
       - provider: cloudwatch_event
-        account: 061308674420
-        pattern:
-          - source:
-              - aws.ec2
-            detail:
-              state:
-                - terminated
-              instance-id:
-                - i-123456789123
-          - source:
-              - aws.codecommit
-            detail-type:
-              - CodeCommit Repository State Change
-            resources:
-              - arn:aws:codecommit:eu-west-1:061308674420:repo
-            detail:
-              referenceType:
-                - branch
-              referenceName:
-                - master
+	properties:
+          account: 061308674420
+          pattern:
+            - source:
+                - aws.ec2
+              detail:
+                state:
+                  - terminated
+                instance-id:
+                  - i-123456789123
+            - source:
+                - aws.codecommit
+              detail-type:
+                - CodeCommit Repository State Change
+              resources:
+                - arn:aws:codecommit:eu-west-1:061308674420:repo
+              detail:
+                referenceType:
+                  - branch
+                referenceName:
+                  - master
 
     buildConfiguration:
       jobs:
