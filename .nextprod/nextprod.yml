@@ -1,71 +1,76 @@
 plugins:
   ssh: nextprod/ssh@1.0.0
   checkout: nextprod/checkout@1.1.2
-
-#secrets:
-#  awskey: hashicorpvault://aws/secrets/awskey
-#  awssecret: hashicorpvault://aws/secrets/awssecret
-#  password:
-#    auth:
-#      role: role
 workflows:
-  - name: Development workflow
+  -
+    name: 'Development workflow'
     triggers:
-      - provider: github
+      -
+        provider: github
         properties:
           events:
             - pull_request
             - push
           repository: self
           filters:
-            - type: branch
+            -
+              type: branch
           include:
             - test
-            - v1.*
+            - 'v1.*'
           exclude:
-          - v1.1
-      - provider: cloudwatch_event
-	      properties:
-          account: 061308674420
+            - v1.1
+      -
+        provider: cloudwatch_event
+        properties:
+          account: 828602640
           pattern:
-            - source:
+            -
+              source:
                 - aws.ec2
               detail:
                 state:
                   - terminated
                 instance-id:
                   - i-123456789123
-            - source:
+            -
+              source:
                 - aws.codecommit
               detail-type:
-                - CodeCommit Repository State Change
+                - 'CodeCommit Repository State Change'
               resources:
-                - arn:aws:codecommit:eu-west-1:061308674420:repo
+                - 'arn:aws:codecommit:eu-west-1:061308674420:repo'
               detail:
                 referenceType:
                   - branch
                 referenceName:
                   - master
-
     buildConfiguration:
       jobs:
         - build
     deploymentConfiguration:
-      target: ecs | kubernetes | aks | gks | lambda | ec2 | step-functions
+      target: 'ecs | kubernetes | aks | gks | lambda | ec2 | step-functions'
       steps:
-        - oldVersionTarget: 95
+        -
+          oldVersionTarget: 95
           newVersionTarget: 5
-        - oldVersionTarget: 90
+        -
+          oldVersionTarget: 90
           newVersionTarget: 10
-        - oldVersionTarget: 70
+        -
+          oldVersionTarget: 70
           newVersionTarget: 30
-        - oldVersionTarget: 50
+        -
+          oldVersionTarget: 50
           neeVersionTarget: 50
-        - oldVersionTarget: 40
+        -
+          oldVersionTarget: 40
           newVersionTarget: 60
-        - oldVersionTarget: 20
+        -
+          oldVersionTarget: 20
           newVersionTarget: 80
-        - oldVersionTarget: 0
+        -
+          oldVersionTarget: 0
           newVersionTarget: 100
       rollbackConditions:
         - verification_failed
@@ -73,10 +78,10 @@ workflows:
       remediationAction: action
     verificationConfiguration:
       providers:
-        # AWS Cloudwatch verification provider
-        - provider: cloudwatch
+        -
+          provider: cloudwatch
           auth:
-            role: arn:aws:iam:123456789123:role/NextProdCloudWatchRole
+            role: 'arn:aws:iam:123456789123:role/NextProdCloudWatchRole'
             credentials:
               accessKey: xxxxxxxxxxxx
               secretKey: xxxxxxxxxxxx
@@ -85,42 +90,56 @@ workflows:
           treatMissingDataAs: good
           deviation: 2
           anomalyCondition:
-            - aws.ec2.cpuutilization:
+            -
+              aws.ec2.cpuutilization:
                 dimensions:
-                  instanceId: i-***
+                  instanceId: 'i-***'
                 standardDeviation: 2
-            - aws.ec2.diskreadbytes:
+            -
+              aws.ec2.diskreadbytes:
                 dimensions:
-                  instanceId: i-*
-                standardDeviation : 3
-            - custom.memoryusage:
+                  instanceId: 'i-*'
+                standardDeviation: 3
+            -
+              custom.memoryusage:
                 dimensions:
-                  instamceId: i-*
+                  instamceId: 'i-*'
                 standardDeviation: 2
-        # Datadog verification provider
-        - provider: datadog
+        -
+          provider: datadog
           verificationDuration: 300
           dataBaseline: -1
           anomalyCondition:
-            - aws.dynamodb.successful_request_latency:
+            -
+              aws.dynamodb.successful_request_latency:
                 dimesnsions:
                   TableName: dev-MessageRequest
                   Operation: Scan
                 moreThan: 400
-        - provider: newrelic
+        -
+          provider: newrelic
           verificationDuration: 300
           dataBaseline: -1
-        - provider: sentry
-        - provider: prometheus
-        - provider: elasticsearch
-        - provider: splunk
-        - provider: sumologic
-        - provider: stackdriver
-        - provider: bugsnag
-        - provider: dynatrace
-        - provider: appdynamics
-        - provider: custom
-
+        -
+          provider: sentry
+        -
+          provider: prometheus
+        -
+          provider: elasticsearch
+        -
+          provider: splunk
+        -
+          provider: sumologic
+        -
+          provider: stackdriver
+        -
+          provider: bugsnag
+        -
+          provider: dynatrace
+        -
+          provider: appdynamics
+        -
+          provider: custom
 jobs:
   test:
     params:
@@ -137,20 +156,13 @@ jobs:
     workdir: /go
     steps:
       go1.10:
-        bash: |
-          if [ $COMPLEX ]; then
-              echo Running complex only tests with dataset {{.dataset}}
-          else
-              echo Running all tests with dataset {{.dataset}}
-          fi
+        bash: "if [ $COMPLEX ]; then\n    echo Running complex only tests with dataset {{.dataset}}\nelse\n    echo Running all tests with dataset {{.dataset}}\nfi\n"
         env:
           VERSION: go1.10
       go1.11:
-        bash: |
-          echo Running tests for go 1.11
+        bash: "echo Running tests for go 1.11\n"
         env:
           VERSION: go1.10
-
   build:
     params:
       dirname:
@@ -168,11 +180,13 @@ jobs:
     machine:
       packer:
         builders:
-          - type: amazon-ebs
+          -
+            type: amazon-ebs
             source_ami_filter:
               filters:
-                - virtualization-type: hvm
-                  name: ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*
+                -
+                  virtualization-type: hvm
+                  name: 'ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*'
                   root-device-type: ebs
               most_recent: true
       docker:
@@ -180,27 +194,19 @@ jobs:
     workdir: /go
     steps:
       ssh:
-        task: ssh/add-ssh    
+        task: ssh/add-ssh
         properties:
-          fingerprint: 90:11:5c:90:4f:6c:c7:69:48:87:ac:ca:61:8f:a4:c8
+          fingerprint: '90:11:5c:90:4f:6c:c7:69:48:87:ac:ca:61:8f:a4:c8'
       clone:
-        name: Clone repository
-        bash: |
-          mkdir -p /go/src/github.com/petrulis
-          cd /go/src/github.com/petrulis
-          git clone https://github.com/petrulis/abn-amro-assignment
+        name: 'Clone repository'
+        bash: "mkdir -p /go/src/github.com/petrulis\ncd /go/src/github.com/petrulis\ngit clone https://github.com/petrulis/abn-amro-assignment\n"
       deps:
-        name: Install dependencies
-        bash: |
-          cd /go/src/github.com/petrulis/abn-amro-assignment
-          dep ensure
+        name: 'Install dependencies'
+        bash: "cd /go/src/github.com/petrulis/abn-amro-assignment\ndep ensure\n"
       build:
-        name: Make build
-        bash: |
-          cd /go/src/github.com/petrulis/abn-amro-assignment
-          make build
+        name: 'Make build'
+        bash: "cd /go/src/github.com/petrulis/abn-amro-assignment\nmake build\n"
       test:
-        name: Running tests
-        bash: |
-          cd /go/src/github.com/petrulis/abn-amro-assignment
-          make test
+        name: 'Running tests'
+        bash: "cd /go/src/github.com/petrulis/abn-amro-assignment\nmake test\n"
+
