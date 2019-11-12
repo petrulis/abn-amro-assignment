@@ -12,20 +12,20 @@ workflows:
   - name: Development workflow
     triggers:
       - provider: github
-	properties:
-	  events:
-	    - pull_request
-	    - push
-	  repository: self
-	  filters:
-	    - type: branch
-	      include:
-	        - test
-	        - v1.*
-	      exclude:
-	        - v1.1
+        properties:
+          events:
+            - pull_request
+            - push
+          repository: self
+          filters:
+            - type: branch
+          include:
+            - test
+            - v1.*
+          exclude:
+          - v1.1
       - provider: cloudwatch_event
-	properties:
+	      properties:
           account: 061308674420
           pattern:
             - source:
