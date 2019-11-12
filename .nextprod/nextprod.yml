@@ -3,7 +3,7 @@ plugins:
   checkout: nextprod/checkout@1.1.5
 workflows:
   -
-    name: 'Development workflow'
+    name: 'Development'
     triggers:
       -
         provider: github
