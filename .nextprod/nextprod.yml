@@ -1,98 +1,74 @@
 plugins:
-  ssh: nextprod/ssh@1.0.1
+  ssh: nextprod/ssh@1.0.0
+  checkout: nextprod/checkout@1.0.0
 
-secrets:
-  awskey: hashicorpvault://aws/secrets/awskey
-  awssecret: hashicorpvault://aws/secrets/awssecret
-  password:
-    auth:
-      role: role
-    arn: arn:xxx:password
+#secrets:
+#  awskey: hashicorpvault://aws/secrets/awskey
+#  awssecret: hashicorpvault://aws/secrets/awssecret
+#  password:
+#    auth:
+#      role: role
 workflows:
   - name: Development workflow
-    integration:
-      jobs:
-        - build
-      triggers:
-        - pull-request:
-          repository: self
-          branch:
+    triggers:
+      - provider: github
+        events:
+          - pull_request
+          - push
+        repository: self
+        filters:
+          - type: branch
             include:
               - test
               - v1.*
             exclude:
               - v1.1
-    delivery:
-      deployment:
-        steps:
-          - oldVersionTarget: 95
-            newVersionTarget: 5
-          - oldVersionTarget: 90
-            newVersionTarget: 10
-          - oldVersionTarget: 70
-            newVersionTarget: 30
-          - oldVersionTarget: 50
-            neeVersionTarget: 50
-          - oldVersionTarget: 40
-            newVersionTarget: 60
-          - oldVersionTarget: 20
-            newVersionTarget: 80
-          - oldVersionTarget: 0
-            newVersionTarget: 100
-        type: ecs | kubernetes | aks | gks | lambda | ec2 | step-functions
+      - provider: cloudwatch_event
+        account: 061308674420
+        pattern:
+          - source:
+              - aws.ec2
+            detail:
+              state:
+                - terminated
+              instance-id:
+                - i-123456789123
+          - source:
+              - aws.codecommit
+            detail-type:
+              - CodeCommit Repository State Change
+            resources:
+              - arn:aws:codecommit:eu-west-1:061308674420:repo
+            detail:
+              referenceType:
+                - branch
+              referenceName:
+                - master
+
+    buildConfiguration:
+      jobs:
+        - build
+    deploymentConfiguration:
+      target: ecs | kubernetes | aks | gks | lambda | ec2 | step-functions
+      steps:
+        - oldVersionTarget: 95
+          newVersionTarget: 5
+        - oldVersionTarget: 90
+          newVersionTarget: 10
+        - oldVersionTarget: 70
+          newVersionTarget: 30
+        - oldVersionTarget: 50
+          neeVersionTarget: 50
+        - oldVersionTarget: 40
+          newVersionTarget: 60
+        - oldVersionTarget: 20
+          newVersionTarget: 80
+        - oldVersionTarget: 0
+          newVersionTarget: 100
       rollbackConditions:
         - verification_failed
         - application_error
       remediationAction: action
-      verify:
-        warmupTime: 60
-        verificatrors:
-          # AWS Cloudwatch verification provider
-          - provider: cloudwatch
-            auth:
-              role: arn:aws:iam:123456789123:role/NextProdCloudWatchRole
-              credentials:
-                accessKey: secrets.awskey
-                secretKey: secrets.awssecret
-            period: 60
-            verificationDuration: 300
-            baseline: -1
-            metricType: average | minimum | maximum
-            anomalyDetectors:
-              - expression: ANOMALY_DETECTION_BAND(m1,2)
-            anomalyCondition:
-              - aws.ec2.cpuutilization:
-                  dimensions:
-                    instanceId: i-***
-                  standardDeviation: 2
-              - aws.ec2.diskreadbytes:
-                  dimensions:
-                    instanceId: i-*
-                  standardDeviation : 3
-              - custom.memoryusage:
-                  dimensions:
-                    instanceId: i-*
-                  standardDeviation: 2
-    triggers:
-      - pull-request:
-        repository: self
-        branch:
-          include:
-            - test
-            - v1.*
-          exclude:
-            - v1.1
-
-workflows:
-  build-and-test:
-    jobs:
-      - build:
-          properties:
-            dirname: /var/www/html
-            depth: 2
-      - test:
-          properties:
-            complexOnly: true
     verificationConfiguration:
       providers:
         # AWS Cloudwatch verification provider
@@ -142,36 +118,7 @@ workflows:
         - provider: dynatrace
         - provider: appdynamics
         - provider: custom
-    triggers:
-      - pull-request:
-          repository: self
-          branch:
-            include:
-              - test
-              - v1.*
-            exclude:
-              - v1.1
-      - cloudwatch-event:
-          account: 061308674420
-          pattern:
-            - source:
-                - aws.ec2
-              detail:
-                state:
-                  - terminated
-                instance-id:
-                  - i-123456789123
-            - source:
-                - aws.codecommit
-              detail-type:
-                - CodeCommit Repository State Change
-              resources:
-                - arn:aws:codecommit:eu-west-1:061308674420:repo
-              detail:
-                referenceType:
-                  - branch
-                referenceName:
-                  - master
+
 jobs:
   test:
     params:
