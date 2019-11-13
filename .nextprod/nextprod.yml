@@ -1,6 +1,6 @@
 plugins:
   ssh: nextprod/ssh@1.0.0
-  checkout: nextprod/checkout@1.2.1
+  checkout: nextprod/checkout@1.2.2
 workflows:
   -
     name: 'Development'
