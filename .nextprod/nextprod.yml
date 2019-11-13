@@ -47,7 +47,7 @@ workflows:
                   - master
     buildConfiguration:
       jobs:
-        - build
+        - test
     deploymentConfiguration:
       target: 'ecs | kubernetes | aks | gks | lambda | ec2 | step-functions'
       steps:
