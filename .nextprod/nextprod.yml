@@ -165,7 +165,7 @@ jobs:
         env:
           VERSION: go1.10
       go1.12:
-        bash: "git clone https://github.com/go-errors/errors"
+        bash: "git clone https://github.com/aws/aws-sdk-go"
         env:
           VERSION: go1.12
   build:
