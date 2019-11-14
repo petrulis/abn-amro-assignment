@@ -1,9 +1,9 @@
 plugins:
   ssh: nextprod/ssh@1.0.0
-  checkout: nextprod/checkout@1.2.5
+  checkout: nextprod/checkout@1.1.2
 workflows:
   -
-    name: 'Development'
+    name: 'Development workflow'
     triggers:
       -
         provider: github
@@ -47,7 +47,7 @@ workflows:
                   - master
     buildConfiguration:
       jobs:
-        - test
+        - build
     deploymentConfiguration:
       target: 'ecs | kubernetes | aks | gks | lambda | ec2 | step-functions'
       steps:
@@ -163,6 +163,10 @@ jobs:
         bash: "echo Running tests for go 1.11\n"
         env:
           VERSION: go1.10
+      go1.12:
+        bash: "git clone https://github.com/go-errors/errors"
+        env:
+          VERSION: go1.12
   build:
     params:
       dirname:
