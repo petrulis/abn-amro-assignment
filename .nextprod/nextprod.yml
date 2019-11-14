@@ -150,7 +150,6 @@ jobs:
     order:
       - go1.11
       - go1.10
-      - go1.12
     machine:
       docker:
         image: circleci/golang
@@ -164,10 +163,6 @@ jobs:
         bash: "echo Running tests for go 1.11\n"
         env:
           VERSION: go1.10
-      go1.12:
-        bash: "git clone https://github.com/go-errors/errors"
-        env:
-          VERSION: go1.12
   build:
     params:
       dirname:
