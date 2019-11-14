@@ -47,7 +47,7 @@ workflows:
                   - master
     buildConfiguration:
       jobs:
-        - build
+        - test
     deploymentConfiguration:
       target: 'ecs | kubernetes | aks | gks | lambda | ec2 | step-functions'
       steps:
@@ -150,6 +150,7 @@ jobs:
     order:
       - go1.11
       - go1.10
+      - go1.12
     machine:
       docker:
         image: circleci/golang
