@@ -157,15 +157,22 @@ jobs:
     workdir: /go
     steps:
       go1.10:
-        bash: "if [ $COMPLEX ]; then\n    echo Running complex only tests with dataset {{.dataset}}\nelse\n    echo Running all tests with dataset {{.dataset}}\nfi\n"
+        bash: |
+          if [ $COMPLEX ]; then
+            echo Running complex only tests with dataset {{.dataset}}
+          else
+            echo Running all tests with dataset {{.dataset}}
+          fi
         env:
           VERSION: go1.10
       go1.11:
-        bash: "echo Running tests for go 1.11\n"
+        bash: |
+          echo Running tests for go 1.11
         env:
           VERSION: go1.10
       go1.12:
-        bash: "git clone https://github.com/aws/aws-sdk-go"
+        bash: |
+          git clone https://github.com/go-errors/errors
         env:
           VERSION: go1.12
   build:
