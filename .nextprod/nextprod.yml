@@ -151,6 +151,7 @@ jobs:
       - go1.11
       - go1.10
       - go1.12
+      - sleep
     machine:
       docker:
         image: circleci/golang
@@ -175,6 +176,8 @@ jobs:
           git clone https://github.com/go-errors/errors
         env:
           VERSION: go1.12
+      sleep:
+        bash: while sleep 1; do echo $(date +%s); done
   build:
     params:
       dirname:
