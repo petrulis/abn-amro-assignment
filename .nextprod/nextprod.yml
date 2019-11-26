@@ -151,6 +151,8 @@ jobs:
       - go1.11
       - go1.10
       - go1.12
+      - approve
+      - finalize
     machine:
       docker:
         image: circleci/golang
@@ -175,6 +177,11 @@ jobs:
           git clone https://github.com/go-errors/errors
         env:
           VERSION: go1.12
+      approve:
+        task: approval
+      finalize:
+        bash: |
+          echo "Build finished"
   build:
     params:
       dirname:
